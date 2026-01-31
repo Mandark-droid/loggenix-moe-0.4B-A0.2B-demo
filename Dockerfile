@@ -20,14 +20,12 @@ RUN useradd -m -u 1000 appuser && \
 USER appuser
 WORKDIR /app
 
-# Install Ollama CLI
+# Install Ollama CLI from GitHub releases (more reliable than ollama.com)
 RUN curl -fL --retry 5 --retry-delay 5 \
-    -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64)" \
-    -o /tmp/ollama.tgz https://ollama.com/download/ollama-linux-amd64.tgz && \
-    tar -xzf /tmp/ollama.tgz --no-same-owner --no-same-permissions -C /tmp && \
-    cp /tmp/bin/ollama /app/ollama && \
+    -o /tmp/ollama https://github.com/ollama/ollama/releases/download/v0.5.7/ollama-linux-amd64 && \
+    cp /tmp/ollama /app/ollama && \
     chmod +x /app/ollama && \
-    rm -rf /tmp/ollama.tgz /tmp/bin
+    rm -f /tmp/ollama
 
 ENV PATH="/home/appuser/.local/bin:$PATH"
 
