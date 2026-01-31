@@ -4,12 +4,10 @@ FROM python:3.11-slim
 # Set Ollama environment
 ENV OLLAMA_HOST=0.0.0.0:11434
 ENV OLLAMA_ORIGINS=http://*,https://*
-# Optional: change model storage to /data for better caching
-# ENV OLLAMA_MODELS=/data/ollama
 
-# Install dependencies
+# Install dependencies (including zstd for Ollama extraction)
 RUN apt-get update && \
-    apt-get install -y curl ca-certificates && \
+    apt-get install -y curl ca-certificates zstd && \
     rm -rf /var/lib/apt/lists/*
 
 # Create non-root user and app directory
@@ -17,15 +15,19 @@ RUN useradd -m -u 1000 appuser && \
     mkdir -p /app && \
     chown -R appuser:appuser /app
 
+# Install Ollama CLI from GitHub releases (as root, then copy)
+RUN curl -fL --retry 5 --retry-delay 5 \
+    -o /tmp/ollama.tar.zst https://github.com/ollama/ollama/releases/download/v0.15.2/ollama-linux-amd64.tar.zst && \
+    cd /tmp && \
+    zstd -d ollama.tar.zst && \
+    tar -xf ollama.tar && \
+    cp /tmp/bin/ollama /app/ollama && \
+    chmod +x /app/ollama && \
+    chown appuser:appuser /app/ollama && \
+    rm -rf /tmp/ollama*
+
 USER appuser
 WORKDIR /app
-
-# Install Ollama CLI from GitHub releases (more reliable than ollama.com)
-RUN curl -fL --retry 5 --retry-delay 5 \
-    -o /tmp/ollama https://github.com/ollama/ollama/releases/download/v0.5.7/ollama-linux-amd64 && \
-    cp /tmp/ollama /app/ollama && \
-    chmod +x /app/ollama && \
-    rm -f /tmp/ollama
 
 ENV PATH="/home/appuser/.local/bin:$PATH"
 
