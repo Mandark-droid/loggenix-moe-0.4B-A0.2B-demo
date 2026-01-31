@@ -32,7 +32,7 @@ CHECKPOINT_REGISTRY = {
     "s3.1": {
         "display_name": "v3.1 (SFT Stage 3.1)",
         "hf_model_id": "kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.1",
-        "gguf_model_name": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.1-GGUF:Q8_0",
+        "gguf_model_name": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.1:Q8_0",
         "benchmarks": {
             "MMLU": 25.26, "HellaSwag": 40.0, "PIQA": 70.0, "ARC": 10.0, "WinoGrande": 60.0,
             "BoolQ": 40.0, "OpenBookQA": 40.0, "GSM8K": 0.0,
@@ -43,7 +43,7 @@ CHECKPOINT_REGISTRY = {
     "s3.2": {
         "display_name": "v3.2 (SFT Stage 3.2)",
         "hf_model_id": "kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.2",
-        "gguf_model_name": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.2-GGUF:Q8_0",
+        "gguf_model_name": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.2:Q8_0",
         "benchmarks": {
             # TODO: Add benchmark results when available
             "MMLU": 0.0, "HellaSwag": 0.0, "PIQA": 0.0, "ARC": 0.0, "WinoGrande": 0.0,
@@ -53,7 +53,7 @@ CHECKPOINT_REGISTRY = {
     "s3.3": {
         "display_name": "v3.3 (SFT Stage 3.3)",
         "hf_model_id": "kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.3",
-        "gguf_model_name": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.3-GGUF:Q8_0",
+        "gguf_model_name": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.3:Q8_0",
         "benchmarks": {
             "MMLU": 0.0, "HellaSwag": 0.0, "PIQA": 0.0, "ARC": 0.0, "WinoGrande": 0.0,
         },
@@ -62,7 +62,7 @@ CHECKPOINT_REGISTRY = {
     "s3.4": {
         "display_name": "v3.4 (SFT Stage 3.4)",
         "hf_model_id": "kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.4",
-        "gguf_model_name": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.4-GGUF:Q8_0",
+        "gguf_model_name": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.4:Q8_0",
         "benchmarks": {
             "MMLU": 0.0, "HellaSwag": 0.0, "PIQA": 0.0, "ARC": 0.0, "WinoGrande": 0.0,
         },
@@ -71,7 +71,7 @@ CHECKPOINT_REGISTRY = {
     "s3.5": {
         "display_name": "v3.5 (SFT Stage 3.5)",
         "hf_model_id": "kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.5",
-        "gguf_model_name": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.5-GGUF:Q8_0",
+        "gguf_model_name": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.5:Q8_0",
         "benchmarks": {
             "MMLU": 0.0, "HellaSwag": 0.0, "PIQA": 0.0, "ARC": 0.0, "WinoGrande": 0.0,
         },
@@ -80,7 +80,7 @@ CHECKPOINT_REGISTRY = {
     "s2.5": {
         "display_name": "v2.5 (SFT Stage 2.5)",
         "hf_model_id": "kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s2.5",
-        "gguf_model_name": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s2.5-GGUF:Q8_0",
+        "gguf_model_name": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s2.5:Q8_0",
         "benchmarks": {
             "MMLU": 0.0, "HellaSwag": 0.0, "PIQA": 0.0, "ARC": 0.0, "WinoGrande": 0.0,
         },
@@ -89,7 +89,7 @@ CHECKPOINT_REGISTRY = {
     "s2.1": {
         "display_name": "v2.1 (SFT Stage 2.1)",
         "hf_model_id": "kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s2.1",
-        "gguf_model_name": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s2.1-GGUF:Q8_0",
+        "gguf_model_name": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s2.1:Q8_0",
         "benchmarks": {
             "MMLU": 0.0, "HellaSwag": 0.0, "PIQA": 0.0, "ARC": 0.0, "WinoGrande": 0.0,
         },
@@ -98,7 +98,7 @@ CHECKPOINT_REGISTRY = {
     "s2.0": {
         "display_name": "v2.0 (SFT Stage 2.0)",
         "hf_model_id": "kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s2.0",
-        "gguf_model_name": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s2.0-GGUF:Q8_0",
+        "gguf_model_name": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s2.0:Q8_0",
         "benchmarks": {
             "MMLU": 0.0, "HellaSwag": 0.0, "PIQA": 0.0, "ARC": 0.0, "WinoGrande": 0.0,
         },

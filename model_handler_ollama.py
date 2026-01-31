@@ -8,7 +8,7 @@ from typing import Dict, Any, Optional, List
 OLLAMA_BASE_URL = "http://localhost:11434"  # Default Ollama URL
 
 # Default model (fallback if no model_name provided)
-DEFAULT_MODEL_NAME = "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.1-GGUF:Q8_0"
+DEFAULT_MODEL_NAME = "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.1:Q8_0"
 
 # Currently active model (updated dynamically)
 _current_model_name = DEFAULT_MODEL_NAME

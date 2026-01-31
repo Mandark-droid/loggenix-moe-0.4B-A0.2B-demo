@@ -17,7 +17,7 @@ echo "Ollama is live!"
 
 # Pull your lightweight model (GGUF format)
 # Note: Update this when switching checkpoints
-MODEL_NAME="hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.1-GGUF:Q8_0"
+MODEL_NAME="hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.1:Q8_0"
 echo "Pulling model: $MODEL_NAME"
 /app/ollama pull "$MODEL_NAME" || {
   echo "Failed to pull model. Check name and internet."
