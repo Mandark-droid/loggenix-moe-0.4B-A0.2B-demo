@@ -850,7 +850,7 @@ def handle_row_select(evt: gr.SelectData):
 # ===== MAIN INTERFACE =====
 
 def create_interface():
-    with gr.Blocks(title="Loggenix MoE 0.4B Demo", theme=gr.themes.Soft()) as demo:
+    with gr.Blocks(title="Loggenix MoE 0.4B Demo") as demo:
         gr.Markdown("# Loggenix MoE 0.4B-A0.2B Demo")
         gr.Markdown("Comprehensive platform for AI model evaluation and testing")
 
@@ -1280,5 +1280,6 @@ if __name__ == "__main__":
         server_name="0.0.0.0",
         server_port=7860,
         share=False,
-        debug=True
+        debug=True,
+        theme=gr.themes.Soft()
     )
