@@ -195,32 +195,32 @@ class BenchmarkPlotter:
     BASELINE_MODELS = {
         'zero_shot': {
             # Loggenix family
-            'Loggenix 0.3B': {'params': 330, 'MMLU': 24.6, 'HellaSwag': 25.0, 'PIQA': 55.0, 'ARC': 15.0, 'WinoGrande': 40.0, 'is_loggenix_family': True},
+            'Loggenix 0.3B': {'params': 330, 'MMLU': 24.6, 'HellaSwag': 25.0, 'PIQA': 55.0, 'ARC': 15.0, 'WinoGrande': 40.0, 'BoolQ': 40.0, 'is_loggenix_family': True},
             # Small models (< 200M)
-            'Falcon-H1-90M': {'params': 90, 'MMLU': 32.3, 'HellaSwag': 37.52, 'PIQA': 65.13, 'ARC': 24.4, 'WinoGrande': 51.3},
-            'Mobile-LLM-140M': {'params': 140, 'MMLU': 24.4, 'HellaSwag': 33.7, 'PIQA': 63.6, 'ARC': 22.6, 'WinoGrande': 52.2},
-            'SmolLM-135M': {'params': 135, 'MMLU': 24.2, 'HellaSwag': 43.0, 'PIQA': 68.4, 'ARC': 28.1, 'WinoGrande': 52.6},
-            'GPT2-137M': {'params': 137, 'MMLU': 26.29, 'HellaSwag': 29.76, 'PIQA': 62.51, 'ARC': 31.09, 'WinoGrande': 49.72},
+            'Falcon-H1-90M': {'params': 90, 'MMLU': 32.3, 'HellaSwag': 37.52, 'PIQA': 65.13, 'ARC': 24.4, 'WinoGrande': 51.3, 'BoolQ': 58.96},
+            'Mobile-LLM-140M': {'params': 140, 'MMLU': 24.4, 'HellaSwag': 33.7, 'PIQA': 63.6, 'ARC': 22.6, 'WinoGrande': 52.2, 'BoolQ': 53.7},
+            'SmolLM-135M': {'params': 135, 'MMLU': 24.2, 'HellaSwag': 43.0, 'PIQA': 68.4, 'ARC': 28.1, 'WinoGrande': 52.6, 'BoolQ': 60.5},
+            'GPT2-137M': {'params': 137, 'MMLU': 26.29, 'HellaSwag': 29.76, 'PIQA': 62.51, 'ARC': 31.09, 'WinoGrande': 49.72, 'BoolQ': 50.0},
             # Medium models (200M-500M)
-            'Gemma3-270M': {'params': 270, 'MMLU': 26.2, 'HellaSwag': 41.5, 'PIQA': 68.3, 'ARC': 25.2, 'WinoGrande': 53.1},
-            'SmolLM-360M': {'params': 360, 'MMLU': 34.17, 'HellaSwag': 53.8, 'PIQA': 72.0, 'ARC': 51.1, 'WinoGrande': 53.7},
-            'Qwen2-500M': {'params': 500, 'MMLU': 31.92, 'HellaSwag': 47.61, 'PIQA': 69.31, 'ARC': 39.74, 'WinoGrande': 54.14},
+            'Gemma3-270M': {'params': 270, 'MMLU': 26.2, 'HellaSwag': 41.5, 'PIQA': 68.3, 'ARC': 25.2, 'WinoGrande': 53.1, 'BoolQ': 58.1},
+            'SmolLM-360M': {'params': 360, 'MMLU': 34.17, 'HellaSwag': 53.8, 'PIQA': 72.0, 'ARC': 51.1, 'WinoGrande': 53.7, 'BoolQ': 62.0},
+            'Qwen2-500M': {'params': 500, 'MMLU': 31.92, 'HellaSwag': 47.61, 'PIQA': 69.31, 'ARC': 39.74, 'WinoGrande': 54.14, 'BoolQ': 60.0},
             # Larger reference models
-            'SmolLM-1.7B': {'params': 1700, 'MMLU': 39.97, 'HellaSwag': 64.1, 'PIQA': 77.3, 'ARC': 61.55, 'WinoGrande': 56.0},
+            'SmolLM-1.7B': {'params': 1700, 'MMLU': 39.97, 'HellaSwag': 64.1, 'PIQA': 77.3, 'ARC': 61.55, 'WinoGrande': 56.0, 'BoolQ': 65.0},
         },
         'few_shot': {
             # Loggenix family
-            'Loggenix 0.3B': {'params': 330, 'MMLU': 25.8, 'HellaSwag': 30.0, 'PIQA': 80.0, 'ARC': 10.0, 'WinoGrande': 50.0, 'is_loggenix_family': True},
+            'Loggenix 0.3B': {'params': 330, 'MMLU': 25.8, 'HellaSwag': 30.0, 'PIQA': 80.0, 'ARC': 10.0, 'WinoGrande': 50.0, 'BoolQ': 42.0, 'is_loggenix_family': True},
             # Small instruct models
-            'SmolLM2-135M-Inst': {'params': 135, 'MMLU': 24.64, 'HellaSwag': 40.21, 'PIQA': 65.0, 'ARC': 26.7, 'WinoGrande': 50.0},
-            'Gemma3-270M-IT': {'params': 270, 'MMLU': 23.38, 'HellaSwag': 36.21, 'PIQA': 65.0, 'ARC': 23.8, 'WinoGrande': 50.0},
-            'SmolLM2-350M-Inst': {'params': 350, 'MMLU': 25.75, 'HellaSwag': 40.93, 'PIQA': 68.0, 'ARC': 32.51, 'WinoGrande': 52.0},
-            'LFM2-350M': {'params': 350, 'MMLU': 43.43, 'HellaSwag': 45.0, 'PIQA': 70.0, 'ARC': 35.0, 'WinoGrande': 55.0},
+            'SmolLM2-135M-Inst': {'params': 135, 'MMLU': 24.64, 'HellaSwag': 40.21, 'PIQA': 65.0, 'ARC': 26.7, 'WinoGrande': 50.0, 'BoolQ': 55.0},
+            'Gemma3-270M-IT': {'params': 270, 'MMLU': 23.38, 'HellaSwag': 36.21, 'PIQA': 65.0, 'ARC': 23.8, 'WinoGrande': 50.0, 'BoolQ': 55.0},
+            'SmolLM2-350M-Inst': {'params': 350, 'MMLU': 25.75, 'HellaSwag': 40.93, 'PIQA': 68.0, 'ARC': 32.51, 'WinoGrande': 52.0, 'BoolQ': 58.0},
+            'LFM2-350M': {'params': 350, 'MMLU': 43.43, 'HellaSwag': 45.0, 'PIQA': 70.0, 'ARC': 35.0, 'WinoGrande': 55.0, 'BoolQ': 60.0},
             # Large models - shows our tiny $200 model competing with billion-param models
-            'Gemma 3 PT 1B': {'params': 1000, 'MMLU': 26.5, 'HellaSwag': 62.3, 'PIQA': 73.8, 'ARC': 38.4, 'WinoGrande': 58.2},
-            'Gemma 3 PT 4B': {'params': 4000, 'MMLU': 59.6, 'HellaSwag': 77.2, 'PIQA': 79.6, 'ARC': 56.2, 'WinoGrande': 64.7},
-            'Gemma 3 PT 12B': {'params': 12000, 'MMLU': 74.5, 'HellaSwag': 84.2, 'PIQA': 81.8, 'ARC': 68.9, 'WinoGrande': 74.3},
-            'Gemma 3 PT 27B': {'params': 27000, 'MMLU': 78.6, 'HellaSwag': 85.6, 'PIQA': 83.3, 'ARC': 70.6, 'WinoGrande': 78.8},
+            'Gemma 3 PT 1B': {'params': 1000, 'MMLU': 26.5, 'HellaSwag': 62.3, 'PIQA': 73.8, 'ARC': 38.4, 'WinoGrande': 58.2, 'BoolQ': 65.0},
+            'Gemma 3 PT 4B': {'params': 4000, 'MMLU': 59.6, 'HellaSwag': 77.2, 'PIQA': 79.6, 'ARC': 56.2, 'WinoGrande': 64.7, 'BoolQ': 75.0},
+            'Gemma 3 PT 12B': {'params': 12000, 'MMLU': 74.5, 'HellaSwag': 84.2, 'PIQA': 81.8, 'ARC': 68.9, 'WinoGrande': 74.3, 'BoolQ': 82.0},
+            'Gemma 3 PT 27B': {'params': 27000, 'MMLU': 78.6, 'HellaSwag': 85.6, 'PIQA': 83.3, 'ARC': 70.6, 'WinoGrande': 78.8, 'BoolQ': 85.0},
         }
     }
 
@@ -246,6 +246,7 @@ class BenchmarkPlotter:
             'PIQA': [benchmarks.get('PIQA', 0.0)],
             'ARC': [benchmarks.get('ARC', 0.0)],
             'WinoGrande': [benchmarks.get('WinoGrande', 0.0)],
+            'BoolQ': [benchmarks.get('BoolQ', 0.0)],
             'IsLoggenix': [True],
             'IsLoggenixFamily': [True]
         }
@@ -260,6 +261,7 @@ class BenchmarkPlotter:
             zero_shot_data['PIQA'].append(data['PIQA'])
             zero_shot_data['ARC'].append(data['ARC'])
             zero_shot_data['WinoGrande'].append(data['WinoGrande'])
+            zero_shot_data['BoolQ'].append(data.get('BoolQ', 0.0))
             zero_shot_data['IsLoggenix'].append(False)
             zero_shot_data['IsLoggenixFamily'].append(data.get('is_loggenix_family', False))
 
@@ -273,6 +275,7 @@ class BenchmarkPlotter:
             'PIQA': [benchmarks.get('PIQA', 0.0)],
             'ARC': [benchmarks.get('ARC', 0.0)],
             'WinoGrande': [benchmarks.get('WinoGrande', 0.0)],
+            'BoolQ': [benchmarks.get('BoolQ', 0.0)],
             'IsLoggenix': [True],
             'IsLoggenixFamily': [True]
         }
@@ -286,6 +289,7 @@ class BenchmarkPlotter:
             few_shot_data['PIQA'].append(data['PIQA'])
             few_shot_data['ARC'].append(data['ARC'])
             few_shot_data['WinoGrande'].append(data['WinoGrande'])
+            few_shot_data['BoolQ'].append(data.get('BoolQ', 0.0))
             few_shot_data['IsLoggenix'].append(False)
             few_shot_data['IsLoggenixFamily'].append(data.get('is_loggenix_family', False))
 
@@ -298,11 +302,11 @@ class BenchmarkPlotter:
         """Create matplotlib comparison charts"""
         df = self.df_zero if shot_type == 'zero' else self.df_few
 
-        # Create subplots
-        fig, axes = plt.subplots(2, 3, figsize=(18, 12))
+        # Create subplots - 3x3 grid for 6 benchmarks + scatter plot + legend
+        fig, axes = plt.subplots(3, 3, figsize=(20, 16))
         fig.suptitle(f'{shot_type.title()}-Shot Benchmark - Loggenix 0.4B ({self.checkpoint_key})', fontsize=16, fontweight='bold')
 
-        benchmarks = ['MMLU', 'HellaSwag', 'PIQA', 'ARC', 'WinoGrande']
+        benchmarks = ['MMLU', 'HellaSwag', 'PIQA', 'ARC', 'WinoGrande', 'BoolQ']
         axes_flat = axes.flatten()
 
         # Color palette - highlight current model in red, 0.3B in orange, others in blue
@@ -338,7 +342,7 @@ class BenchmarkPlotter:
                         f'{value:.1f}%', ha='center', va='bottom', fontsize=9)
 
         # Parameter efficiency scatter plot
-        ax_scatter = axes_flat[5]
+        ax_scatter = axes_flat[6]
         scatter = ax_scatter.scatter(df['Param_Numeric'], df['MMLU'],
                                      c=colors, s=100, alpha=0.7, edgecolors='black')
         ax_scatter.set_xlabel('Parameters (M)')
@@ -354,6 +358,20 @@ class BenchmarkPlotter:
                                 xytext=(5, 5), textcoords='offset points',
                                 fontsize=8, ha='left')
 
+        # Add color legend in axes_flat[7]
+        ax_legend = axes_flat[7]
+        ax_legend.axis('off')
+        legend_elements = [
+            plt.Rectangle((0, 0), 1, 1, facecolor='#ff6b6b', label='Loggenix 0.4B (current)'),
+            plt.Rectangle((0, 0), 1, 1, facecolor='#ffa500', label='Loggenix 0.3B (family)'),
+            plt.Rectangle((0, 0), 1, 1, facecolor='#90EE90', label='Outperformed by 0.4B'),
+            plt.Rectangle((0, 0), 1, 1, facecolor='#4a90e2', label='Other models'),
+        ]
+        ax_legend.legend(handles=legend_elements, loc='center', fontsize=12, title='Color Legend')
+
+        # Hide unused subplot
+        axes_flat[8].axis('off')
+
         plt.tight_layout()
         return fig
 
@@ -361,16 +379,17 @@ class BenchmarkPlotter:
         """Create interactive plotly charts"""
         df = self.df_zero if shot_type == 'zero' else self.df_few
 
-        # Create subplots
+        # Create subplots - 3x3 grid for 6 benchmarks + scatter + legend space
         fig = make_subplots(
-            rows=2, cols=3,
-            subplot_titles=('MMLU', 'HellaSwag', 'PIQA', 'ARC', 'WinoGrande', 'Parameter Efficiency'),
+            rows=3, cols=3,
+            subplot_titles=('MMLU', 'HellaSwag', 'PIQA', 'ARC', 'WinoGrande', 'BoolQ', 'Parameter Efficiency', '', ''),
             specs=[[{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": False}],
-                   [{"secondary_y": False}, {"secondary_y": False}, {"type": "scatter"}]]
+                   [{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": False}],
+                   [{"type": "scatter"}, {"secondary_y": False}, {"secondary_y": False}]]
         )
 
-        benchmarks = ['MMLU', 'HellaSwag', 'PIQA', 'ARC', 'WinoGrande']
-        positions = [(1, 1), (1, 2), (1, 3), (2, 1), (2, 2)]
+        benchmarks = ['MMLU', 'HellaSwag', 'PIQA', 'ARC', 'WinoGrande', 'BoolQ']
+        positions = [(1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3)]
 
         for i, (benchmark, pos) in enumerate(zip(benchmarks, positions)):
             loggenix_score = df[df['IsLoggenix']][benchmark].iloc[0]
@@ -426,27 +445,25 @@ class BenchmarkPlotter:
                 name='Models',
                 showlegend=False
             ),
-            row=2, col=3
+            row=3, col=1
         )
 
         # Update layout
         fig.update_layout(
             title_text=f'{shot_type.title()}-Shot Benchmark - Loggenix 0.4B ({self.checkpoint_key})',
             title_x=0.5,
-            height=800,
+            height=1000,
             showlegend=False
         )
 
         # Update x-axis for scatter plot to log scale
-        fig.update_xaxes(type="log", row=2, col=3, title_text="Parameters (M)")
-        fig.update_yaxes(title_text="MMLU Score (%)", row=2, col=3)
+        fig.update_xaxes(type="log", row=3, col=1, title_text="Parameters (M)")
+        fig.update_yaxes(title_text="MMLU Score (%)", row=3, col=1)
 
-        # Update all y-axes
-        for i in range(1, 6):
-            if i <= 3:
-                fig.update_yaxes(title_text="Score (%)", row=1, col=i)
-            elif i <= 5:
-                fig.update_yaxes(title_text="Score (%)", row=2, col=i - 3)
+        # Update all y-axes for benchmark charts
+        for col in range(1, 4):
+            fig.update_yaxes(title_text="Score (%)", row=1, col=col)
+            fig.update_yaxes(title_text="Score (%)", row=2, col=col)
 
         return fig
 
@@ -463,7 +480,7 @@ class BenchmarkPlotter:
         summary = f"## {display_name} ({shot_type.title()}-Shot)\n"
         summary += f"*Eval date: {eval_date}*\n\n"
 
-        benchmarks = ['MMLU', 'HellaSwag', 'PIQA', 'ARC', 'WinoGrande']
+        benchmarks = ['MMLU', 'HellaSwag', 'PIQA', 'ARC', 'WinoGrande', 'BoolQ']
         competitive_areas = []
 
         for benchmark in benchmarks:
