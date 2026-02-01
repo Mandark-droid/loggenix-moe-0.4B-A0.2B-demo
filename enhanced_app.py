@@ -6,7 +6,13 @@ import datetime
 import json
 import random
 import os
-from model_handler_ollama import generate_response, get_inference_configs
+# Import both inference backends
+from model_handler_ollama import generate_response as ollama_generate, get_inference_configs as ollama_configs
+from model_handler import generate_response as transformers_generate, get_inference_configs as transformers_configs
+
+def get_inference_configs():
+    """Get inference configs (using Ollama configs as default)"""
+    return ollama_configs()
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
@@ -28,11 +34,19 @@ HF_API = HfApi()
 # ===== CHECKPOINT REGISTRY =====
 # Each checkpoint has its own model ID, GGUF path, and benchmark results
 # Add new checkpoints here - they will appear in the UI dropdown
+# Available quantization options
+QUANTIZATION_OPTIONS = {
+    "Q8_0": {"display_name": "Q8_0 (8-bit, balanced)", "description": "8-bit quantization - good balance of size and quality"},
+    "f16": {"display_name": "F16 (16-bit, higher quality)", "description": "16-bit float - larger but higher quality"},
+}
+DEFAULT_QUANTIZATION = "Q8_0"
+
 CHECKPOINT_REGISTRY = {
     "s3.1": {
         "display_name": "v3.1 (SFT Stage 3.1)",
         "hf_model_id": "kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.1",
-        "gguf_model_name": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.1:Q8_0",
+        "hf_repo_base": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.1",
+        "available_quantizations": ["Q8_0", "f16"],
         "benchmarks": {
             "MMLU": 25.26, "HellaSwag": 40.0, "PIQA": 70.0, "ARC": 10.0, "WinoGrande": 60.0,
             "BoolQ": 40.0, "OpenBookQA": 40.0, "GSM8K": 0.0,
@@ -43,7 +57,8 @@ CHECKPOINT_REGISTRY = {
     "s3.2": {
         "display_name": "v3.2 (SFT Stage 3.2)",
         "hf_model_id": "kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.2",
-        "gguf_model_name": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.2:Q8_0",
+        "hf_repo_base": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.2",
+        "available_quantizations": ["Q8_0", "f16"],
         "benchmarks": {
             # TODO: Add benchmark results when available
             "MMLU": 0.0, "HellaSwag": 0.0, "PIQA": 0.0, "ARC": 0.0, "WinoGrande": 0.0,
@@ -53,7 +68,8 @@ CHECKPOINT_REGISTRY = {
     "s3.3": {
         "display_name": "v3.3 (SFT Stage 3.3)",
         "hf_model_id": "kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.3",
-        "gguf_model_name": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.3:Q8_0",
+        "hf_repo_base": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.3",
+        "available_quantizations": ["Q8_0", "f16"],
         "benchmarks": {
             "MMLU": 0.0, "HellaSwag": 0.0, "PIQA": 0.0, "ARC": 0.0, "WinoGrande": 0.0,
         },
@@ -62,7 +78,8 @@ CHECKPOINT_REGISTRY = {
     "s3.4": {
         "display_name": "v3.4 (SFT Stage 3.4)",
         "hf_model_id": "kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.4",
-        "gguf_model_name": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.4:Q8_0",
+        "hf_repo_base": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.4",
+        "available_quantizations": ["Q8_0", "f16"],
         "benchmarks": {
             "MMLU": 0.0, "HellaSwag": 0.0, "PIQA": 0.0, "ARC": 0.0, "WinoGrande": 0.0,
         },
@@ -71,7 +88,8 @@ CHECKPOINT_REGISTRY = {
     "s3.5": {
         "display_name": "v3.5 (SFT Stage 3.5)",
         "hf_model_id": "kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.5",
-        "gguf_model_name": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.5:Q8_0",
+        "hf_repo_base": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.5",
+        "available_quantizations": ["Q8_0", "f16"],
         "benchmarks": {
             "MMLU": 0.0, "HellaSwag": 0.0, "PIQA": 0.0, "ARC": 0.0, "WinoGrande": 0.0,
         },
@@ -80,7 +98,8 @@ CHECKPOINT_REGISTRY = {
     "s2.5": {
         "display_name": "v2.5 (SFT Stage 2.5)",
         "hf_model_id": "kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s2.5",
-        "gguf_model_name": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s2.5:Q8_0",
+        "hf_repo_base": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s2.5",
+        "available_quantizations": ["Q8_0", "f16"],
         "benchmarks": {
             "MMLU": 0.0, "HellaSwag": 0.0, "PIQA": 0.0, "ARC": 0.0, "WinoGrande": 0.0,
         },
@@ -89,7 +108,8 @@ CHECKPOINT_REGISTRY = {
     "s2.1": {
         "display_name": "v2.1 (SFT Stage 2.1)",
         "hf_model_id": "kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s2.1",
-        "gguf_model_name": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s2.1:Q8_0",
+        "hf_repo_base": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s2.1",
+        "available_quantizations": ["Q8_0", "f16"],
         "benchmarks": {
             "MMLU": 0.0, "HellaSwag": 0.0, "PIQA": 0.0, "ARC": 0.0, "WinoGrande": 0.0,
         },
@@ -98,7 +118,8 @@ CHECKPOINT_REGISTRY = {
     "s2.0": {
         "display_name": "v2.0 (SFT Stage 2.0)",
         "hf_model_id": "kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s2.0",
-        "gguf_model_name": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s2.0:Q8_0",
+        "hf_repo_base": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s2.0",
+        "available_quantizations": ["Q8_0", "f16"],
         "benchmarks": {
             "MMLU": 0.0, "HellaSwag": 0.0, "PIQA": 0.0, "ARC": 0.0, "WinoGrande": 0.0,
         },
@@ -116,6 +137,23 @@ CURRENT_CHECKPOINT_KEY = DEFAULT_CHECKPOINT
 def get_checkpoint_choices():
     """Get list of checkpoint choices for dropdown"""
     return [(v["display_name"], k) for k, v in CHECKPOINT_REGISTRY.items()]
+
+
+def get_quantization_choices(checkpoint_key=None):
+    """Get available quantization options for a checkpoint"""
+    if checkpoint_key and checkpoint_key in CHECKPOINT_REGISTRY:
+        available = CHECKPOINT_REGISTRY[checkpoint_key].get("available_quantizations", ["Q8_0"])
+    else:
+        available = list(QUANTIZATION_OPTIONS.keys())
+    return [(QUANTIZATION_OPTIONS[q]["display_name"], q) for q in available if q in QUANTIZATION_OPTIONS]
+
+
+def build_model_name(checkpoint_key, quantization):
+    """Build the full Ollama model name from checkpoint and quantization"""
+    checkpoint = CHECKPOINT_REGISTRY.get(checkpoint_key, CHECKPOINT_REGISTRY[DEFAULT_CHECKPOINT])
+    base = checkpoint.get("hf_repo_base", "")
+    quant = quantization if quantization else DEFAULT_QUANTIZATION
+    return f"{base}:{quant}"
 
 
 def get_current_checkpoint_info():
@@ -597,7 +635,7 @@ def get_task_by_type(task_type):
     return "No task found for this type"
 
 
-def chat_interface_with_inference(prompt, history, system_prompt, inference_config, checkpoint_key):
+def chat_interface_with_inference(prompt, history, system_prompt, inference_config, checkpoint_key, backend, quantization):
     """Enhanced chat interface with model inference and history"""
     global CURRENT_CHECKPOINT_KEY
 
@@ -616,22 +654,34 @@ def chat_interface_with_inference(prompt, history, system_prompt, inference_conf
         else:
             # Get checkpoint info
             checkpoint = CHECKPOINT_REGISTRY.get(checkpoint_key, CHECKPOINT_REGISTRY[DEFAULT_CHECKPOINT])
-            model_name = checkpoint.get('gguf_model_name', '')
 
-            # Get inference configuration
-            configs = get_inference_configs()
-            config = configs.get(inference_config, configs["Optimized for Speed"])
+            if backend == "Ollama (GGUF)":
+                # Build Ollama model name from checkpoint and quantization
+                model_name = build_model_name(checkpoint_key, quantization)
+                backend_label = f"Ollama/{quantization}"
 
-            # Run inference using the model with dynamic model name
-            response = generate_response(
-                system_prompt=system_prompt,
-                user_input=prompt,
-                config_name=inference_config,
-                model_name=model_name  # Pass dynamic model name
-            )
+                # Run inference using Ollama
+                response = ollama_generate(
+                    system_prompt=system_prompt,
+                    user_input=prompt,
+                    config_name=inference_config,
+                    model_name=model_name
+                )
+            else:
+                # Use Transformers backend with HF model ID
+                model_name = checkpoint.get('hf_model_id', '')
+                backend_label = "Transformers"
+
+                # Run inference using Transformers
+                response = transformers_generate(
+                    system_prompt=system_prompt,
+                    user_input=prompt,
+                    config_name=inference_config,
+                    model_name=model_name
+                )
 
         # Format and add AI response to history
-        formatted_response = f"**AI Assistant ({checkpoint_key}):**\n{response}"
+        formatted_response = f"**AI Assistant ({checkpoint_key}, {backend_label}):**\n{response}"
         history.append(("AI Assistant", formatted_response))
 
     except Exception as e:
@@ -893,6 +943,23 @@ def create_interface():
                             info="Select checkpoint for inference"
                         )
 
+                        # Inference backend selector
+                        inference_backend_dropdown = gr.Dropdown(
+                            choices=["Ollama (GGUF)", "Transformers (HF)"],
+                            value="Ollama (GGUF)",
+                            label="Inference Backend",
+                            info="Select inference backend"
+                        )
+
+                        # Quantization selector (for Ollama only)
+                        quantization_dropdown = gr.Dropdown(
+                            choices=list(QUANTIZATION_OPTIONS.keys()),
+                            value=DEFAULT_QUANTIZATION,
+                            label="Quantization (Ollama only)",
+                            info="Select GGUF quantization level",
+                            visible=True
+                        )
+
                         task_type_dropdown = gr.Dropdown(
                             choices=get_task_types(),
                             value=get_task_types()[0] if get_task_types() else None,
@@ -966,9 +1033,19 @@ def create_interface():
                     outputs=[system_prompt]
                 )
 
+                # Toggle quantization visibility based on backend
+                def toggle_quantization_visibility(backend):
+                    return gr.update(visible=(backend == "Ollama (GGUF)"))
+
+                inference_backend_dropdown.change(
+                    fn=toggle_quantization_visibility,
+                    inputs=[inference_backend_dropdown],
+                    outputs=[quantization_dropdown]
+                )
+
                 send_btn.click(
                     chat_interface_with_inference,
-                    inputs=[chat_input, chat_history_state, system_prompt, inference_config, inference_checkpoint_dropdown],
+                    inputs=[chat_input, chat_history_state, system_prompt, inference_config, inference_checkpoint_dropdown, inference_backend_dropdown, quantization_dropdown],
                     outputs=[chat_display, chat_input]
                 ).then(
                     lambda x: x,
@@ -982,7 +1059,7 @@ def create_interface():
 
                 chat_input.submit(
                     chat_interface_with_inference,
-                    inputs=[chat_input, chat_history_state, system_prompt, inference_config, inference_checkpoint_dropdown],
+                    inputs=[chat_input, chat_history_state, system_prompt, inference_config, inference_checkpoint_dropdown, inference_backend_dropdown, quantization_dropdown],
                     outputs=[chat_display, chat_input]
                 ).then(
                     lambda x: x,

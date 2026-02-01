@@ -14,10 +14,11 @@ torch.backends.cudnn.allow_tf32 = True
 # Global model and tokenizer variables
 model = None
 tokenizer = None
+_current_model_id = None  # Track which model is currently loaded
 
-# Model configuration - Update this when switching checkpoints
+# Default model configuration - Update this when switching checkpoints
 # Note: All models/checkpoints are private, ensure HF_TOKEN is set
-MODEL_ID = "kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.1"
+DEFAULT_MODEL_ID = "kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.1"
 
 # Inference configurations
 INFERENCE_CONFIGS = {
@@ -60,15 +61,30 @@ def get_inference_configs():
 
 
 
-def load_model():
-    """Load model and tokenizer with optimizations"""
-    global model, tokenizer
+def load_model(model_name: str = None):
+    """Load model and tokenizer with optimizations. Supports dynamic model switching."""
+    global model, tokenizer, _current_model_id
 
-    if model is not None and tokenizer is not None:
+    # Use provided model_name or fall back to default
+    model_id = model_name if model_name else DEFAULT_MODEL_ID
+
+    # Check if we need to reload (different model requested)
+    if model is not None and tokenizer is not None and _current_model_id == model_id:
         return model, tokenizer
 
-    print("Loading tokenizer...")
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
+    # If switching models, cleanup old model first
+    if model is not None and _current_model_id != model_id:
+        print(f"Switching model from {_current_model_id} to {model_id}")
+        del model
+        del tokenizer
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        model = None
+        tokenizer = None
+
+    print(f"Loading tokenizer for {model_id}...")
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
 
     ## load 8 bit quants
     quantization_config = BitsAndBytesConfig(
@@ -84,15 +100,18 @@ def load_model():
     #     bnb_4bit_use_double_quant=True,
     # )
 
-    print("Loading model...")
+    print(f"Loading model {model_id}...")
     model = AutoModelForCausalLM.from_pretrained(
-        MODEL_ID,
+        model_id,
         device_map="auto",
         dtype=torch.float16,  # Use half precision for speed
         attn_implementation="flash_attention_2" if hasattr(torch.nn, 'scaled_dot_product_attention') else None,
         use_cache=True,
         #quantization_config=quantization_config,
     ).eval()
+
+    # Track which model is loaded
+    _current_model_id = model_id
 
     # Enable gradient checkpointing if available
     if hasattr(model, 'gradient_checkpointing_enable'):
@@ -311,11 +330,17 @@ def monitor_memory():
         cached = torch.cuda.memory_reserved() / 1e9
         print(f"GPU Memory - Allocated: {allocated:.2f}GB, Cached: {cached:.2f}GB")
 
-def generate_response(system_prompt: str, user_input: str, config_name: str = "Middle-ground") -> str:
+def generate_response(system_prompt: str, user_input: str, config_name: str = "Middle-ground", model_name: str = None) -> str:
     """
     Run inference with the given task (system prompt) and user input using the specified config.
+
+    Args:
+        system_prompt: System instruction for the model
+        user_input: User's input message
+        config_name: Configuration preset to use
+        model_name: Optional HuggingFace model ID (for dynamic checkpoint switching)
     """
-    load_model()
+    load_model(model_name)
 
     config = INFERENCE_CONFIGS[config_name]
 
