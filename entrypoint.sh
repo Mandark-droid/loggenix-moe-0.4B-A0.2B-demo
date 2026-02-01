@@ -17,9 +17,10 @@ echo "Ollama is live!"
 
 # Authenticate with HuggingFace for private models
 if [ -n "$HF_TOKEN" ]; then
-  echo "Logging into HuggingFace CLI..."
-  huggingface-cli login --token "$HF_TOKEN" --add-to-git-credential
+  echo "Logging into HuggingFace..."
+  export HF_TOKEN="$HF_TOKEN"
   export HUGGING_FACE_HUB_TOKEN="$HF_TOKEN"
+  python -m huggingface_hub.commands.huggingface_cli login --token "$HF_TOKEN"
   echo "HF authentication configured"
 else
   echo "WARNING: HF_TOKEN not set - private model access may fail"
