@@ -26,17 +26,23 @@ else
   echo "WARNING: HF_TOKEN not set - private model access may fail"
 fi
 
-# Pull your lightweight model (GGUF format)
+# Pull models (GGUF format) - both quantizations available
 # Note: Update this when switching checkpoints
-MODEL_NAME="hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.1:Q8_0"
-echo "Pulling model: $MODEL_NAME"
+MODEL_BASE="hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.1"
 
-/app/ollama pull "$MODEL_NAME" || {
-  echo "Failed to pull model. Check name, auth token, and internet."
-  echo "Model: $MODEL_NAME"
+echo "Pulling F16 model (default)..."
+/app/ollama pull "${MODEL_BASE}:f16" || {
+  echo "Failed to pull F16 model. Check name, auth token, and internet."
   echo "HF_TOKEN set: $([ -n "$HF_TOKEN" ] && echo 'yes' || echo 'no')"
   exit 1
 }
+
+echo "Pulling Q8_0 model..."
+/app/ollama pull "${MODEL_BASE}:Q8_0" || {
+  echo "Warning: Failed to pull Q8_0 model (continuing with F16 only)"
+}
+
+echo "Models ready!"
 
 # Start your app
 echo "Launching enhanced_app.py"

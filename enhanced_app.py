@@ -39,7 +39,7 @@ QUANTIZATION_OPTIONS = {
     "Q8_0": {"display_name": "Q8_0 (8-bit, balanced)", "description": "8-bit quantization - good balance of size and quality"},
     "f16": {"display_name": "F16 (16-bit, higher quality)", "description": "16-bit float - larger but higher quality"},
 }
-DEFAULT_QUANTIZATION = "Q8_0"
+DEFAULT_QUANTIZATION = "f16"
 
 CHECKPOINT_REGISTRY = {
     "s3.1": {
