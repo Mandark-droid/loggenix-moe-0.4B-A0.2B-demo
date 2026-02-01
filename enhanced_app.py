@@ -60,10 +60,11 @@ CHECKPOINT_REGISTRY = {
         "hf_repo_base": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.2",
         "available_quantizations": ["Q8_0", "f16"],
         "benchmarks": {
-            # TODO: Add benchmark results when available
-            "MMLU": 0.0, "HellaSwag": 0.0, "PIQA": 0.0, "ARC": 0.0, "WinoGrande": 0.0,
+            "MMLU": 27.19, "HellaSwag": 40.0, "PIQA": 70.0, "ARC": 10.0, "WinoGrande": 50.0,
+            "BoolQ": 30.0, "OpenBookQA": 40.0, "GSM8K": 0.0,
+            "synthetic_mean": 22.0, "tool_calling": 30.0, "programming": 0.0,
         },
-        "eval_date": None,
+        "eval_date": "2026-01-28",
     },
     "s3.3": {
         "display_name": "v3.3 (SFT Stage 3.3)",
@@ -71,9 +72,11 @@ CHECKPOINT_REGISTRY = {
         "hf_repo_base": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.3",
         "available_quantizations": ["Q8_0", "f16"],
         "benchmarks": {
-            "MMLU": 0.0, "HellaSwag": 0.0, "PIQA": 0.0, "ARC": 0.0, "WinoGrande": 0.0,
+            "MMLU": 26.0, "HellaSwag": 38.0, "PIQA": 68.0, "ARC": 12.0, "WinoGrande": 52.0,
+            "BoolQ": 32.0, "OpenBookQA": 38.0, "GSM8K": 0.0,
+            "synthetic_mean": 25.0, "tool_calling": 75.0, "programming": 0.0,
         },
-        "eval_date": None,
+        "eval_date": "2026-01-26",
     },
     "s3.4": {
         "display_name": "v3.4 (SFT Stage 3.4)",
@@ -101,9 +104,11 @@ CHECKPOINT_REGISTRY = {
         "hf_repo_base": "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s2.5",
         "available_quantizations": ["Q8_0", "f16"],
         "benchmarks": {
-            "MMLU": 0.0, "HellaSwag": 0.0, "PIQA": 0.0, "ARC": 0.0, "WinoGrande": 0.0,
+            "MMLU": 23.4, "HellaSwag": 45.0, "PIQA": 60.0, "ARC": 20.0, "WinoGrande": 55.0,
+            "BoolQ": 30.0, "OpenBookQA": 30.0, "GSM8K": 0.0,
+            "synthetic_mean": 30.0, "tool_calling": 30.0, "programming": 0.0,
         },
-        "eval_date": None,
+        "eval_date": "2026-01-19",
     },
     "s2.1": {
         "display_name": "v2.1 (SFT Stage 2.1)",
@@ -188,6 +193,7 @@ class BenchmarkPlotter:
     # Baseline models for comparison (these don't change)
     BASELINE_MODELS = {
         'zero_shot': {
+            'Loggenix 0.3B': {'params': 330, 'MMLU': 24.6, 'HellaSwag': 25.0, 'PIQA': 55.0, 'ARC': 15.0, 'WinoGrande': 40.0, 'is_loggenix_family': True},
             'SmolLM-135M': {'params': 135, 'MMLU': 30.23, 'HellaSwag': 42.3, 'PIQA': 69.6, 'ARC': 44.0, 'WinoGrande': 52.7},
             'GPT2-137M': {'params': 137, 'MMLU': 26.29, 'HellaSwag': 29.76, 'PIQA': 62.51, 'ARC': 31.09, 'WinoGrande': 49.72},
             'SmolLM-360M': {'params': 360, 'MMLU': 34.17, 'HellaSwag': 53.8, 'PIQA': 72.0, 'ARC': 51.1, 'WinoGrande': 53.7},
@@ -195,6 +201,7 @@ class BenchmarkPlotter:
             'SmolLM-1.7B': {'params': 1700, 'MMLU': 39.97, 'HellaSwag': 64.1, 'PIQA': 77.3, 'ARC': 61.55, 'WinoGrande': 56.0},
         },
         'few_shot': {
+            'Loggenix 0.3B': {'params': 330, 'MMLU': 25.8, 'HellaSwag': 30.0, 'PIQA': 80.0, 'ARC': 10.0, 'WinoGrande': 50.0, 'is_loggenix_family': True},
             'Gemma 3 PT 1B': {'params': 1000, 'MMLU': 26.5, 'HellaSwag': 62.3, 'PIQA': 73.8, 'ARC': 38.4, 'WinoGrande': 58.2},
             'Gemma 3 PT 4B': {'params': 4000, 'MMLU': 59.6, 'HellaSwag': 77.2, 'PIQA': 79.6, 'ARC': 56.2, 'WinoGrande': 64.7},
             'Gemma 3 PT 12B': {'params': 12000, 'MMLU': 74.5, 'HellaSwag': 84.2, 'PIQA': 81.8, 'ARC': 68.9, 'WinoGrande': 74.3},
@@ -216,7 +223,7 @@ class BenchmarkPlotter:
 
         # Build zero-shot comparison data
         zero_shot_data = {
-            'Model': [f'Loggenix {self.checkpoint_key}'],
+            'Model': [f'Loggenix 0.4B {self.checkpoint_key}'],
             'Parameters': ['0.4B'],
             'Param_Numeric': [400],
             'MMLU': [benchmarks.get('MMLU', 0.0)],
@@ -224,7 +231,8 @@ class BenchmarkPlotter:
             'PIQA': [benchmarks.get('PIQA', 0.0)],
             'ARC': [benchmarks.get('ARC', 0.0)],
             'WinoGrande': [benchmarks.get('WinoGrande', 0.0)],
-            'IsLoggenix': [True]
+            'IsLoggenix': [True],
+            'IsLoggenixFamily': [True]
         }
 
         # Add baseline models
@@ -238,10 +246,11 @@ class BenchmarkPlotter:
             zero_shot_data['ARC'].append(data['ARC'])
             zero_shot_data['WinoGrande'].append(data['WinoGrande'])
             zero_shot_data['IsLoggenix'].append(False)
+            zero_shot_data['IsLoggenixFamily'].append(data.get('is_loggenix_family', False))
 
         # Build few-shot comparison data
         few_shot_data = {
-            'Model': [f'Loggenix {self.checkpoint_key}'],
+            'Model': [f'Loggenix 0.4B {self.checkpoint_key}'],
             'Parameters': ['0.4B'],
             'Param_Numeric': [400],
             'MMLU': [benchmarks.get('MMLU', 0.0)],
@@ -249,12 +258,13 @@ class BenchmarkPlotter:
             'PIQA': [benchmarks.get('PIQA', 0.0)],
             'ARC': [benchmarks.get('ARC', 0.0)],
             'WinoGrande': [benchmarks.get('WinoGrande', 0.0)],
-            'IsLoggenix': [True]
+            'IsLoggenix': [True],
+            'IsLoggenixFamily': [True]
         }
 
         for model_name, data in self.BASELINE_MODELS['few_shot'].items():
             few_shot_data['Model'].append(model_name)
-            few_shot_data['Parameters'].append(f"{data['params']/1000:.0f}B")
+            few_shot_data['Parameters'].append(f"{data['params']}M" if data['params'] < 1000 else f"{data['params']/1000:.1f}B")
             few_shot_data['Param_Numeric'].append(data['params'])
             few_shot_data['MMLU'].append(data['MMLU'])
             few_shot_data['HellaSwag'].append(data['HellaSwag'])
@@ -262,6 +272,7 @@ class BenchmarkPlotter:
             few_shot_data['ARC'].append(data['ARC'])
             few_shot_data['WinoGrande'].append(data['WinoGrande'])
             few_shot_data['IsLoggenix'].append(False)
+            few_shot_data['IsLoggenixFamily'].append(data.get('is_loggenix_family', False))
 
         self.df_zero = pd.DataFrame(zero_shot_data)
         self.df_few = pd.DataFrame(few_shot_data)
@@ -279,17 +290,24 @@ class BenchmarkPlotter:
         benchmarks = ['MMLU', 'HellaSwag', 'PIQA', 'ARC', 'WinoGrande']
         axes_flat = axes.flatten()
 
-        # Color palette - highlight Loggenix in red
-        colors = ['#ff6b6b' if is_loggenix else '#4a90e2' for is_loggenix in df['IsLoggenix']]
+        # Color palette - highlight current model in red, 0.3B in orange, others in blue
+        def get_color(row):
+            if row['IsLoggenix']:
+                return '#ff6b6b'  # Red for current 0.4B model
+            elif row['IsLoggenixFamily']:
+                return '#ffa500'  # Orange for Loggenix 0.3B
+            else:
+                return '#4a90e2'  # Blue for other models
+        colors = [get_color(row) for _, row in df.iterrows()]
 
         for i, benchmark in enumerate(benchmarks):
             ax = axes_flat[i]
             bars = ax.bar(range(len(df)), df[benchmark], color=colors, alpha=0.8)
 
-            # Highlight bars where Loggenix outperforms
+            # Highlight bars where current Loggenix outperforms
             loggenix_score = df[df['IsLoggenix']][benchmark].iloc[0]
             for j, (bar, score) in enumerate(zip(bars, df[benchmark])):
-                if not df['IsLoggenix'].iloc[j] and score < loggenix_score:
+                if not df['IsLoggenix'].iloc[j] and not df['IsLoggenixFamily'].iloc[j] and score < loggenix_score:
                     bar.set_color('#90EE90')  # Light green for outperformed models
 
             ax.set_title(f'{benchmark}', fontweight='bold')
@@ -342,11 +360,13 @@ class BenchmarkPlotter:
         for i, (benchmark, pos) in enumerate(zip(benchmarks, positions)):
             loggenix_score = df[df['IsLoggenix']][benchmark].iloc[0]
 
-            # Create colors based on performance vs Loggenix
+            # Create colors: red=current 0.4B, orange=0.3B family, green=outperformed, blue=others
             bar_colors = []
             for idx, row in df.iterrows():
                 if row['IsLoggenix']:
-                    bar_colors.append('#ff6b6b')  # Red for Loggenix
+                    bar_colors.append('#ff6b6b')  # Red for current 0.4B
+                elif row['IsLoggenixFamily']:
+                    bar_colors.append('#ffa500')  # Orange for Loggenix 0.3B
                 elif row[benchmark] < loggenix_score:
                     bar_colors.append('#90EE90')  # Light green for outperformed
                 else:
@@ -366,7 +386,16 @@ class BenchmarkPlotter:
                 row=pos[0], col=pos[1]
             )
 
-        # Parameter efficiency scatter plot
+        # Parameter efficiency scatter plot with color coding
+        scatter_colors = []
+        for _, row in df.iterrows():
+            if row['IsLoggenix']:
+                scatter_colors.append('#ff6b6b')  # Red for current 0.4B
+            elif row['IsLoggenixFamily']:
+                scatter_colors.append('#ffa500')  # Orange for Loggenix 0.3B
+            else:
+                scatter_colors.append('#4a90e2')  # Blue for others
+
         fig.add_trace(
             go.Scatter(
                 x=df['Param_Numeric'],
@@ -376,8 +405,7 @@ class BenchmarkPlotter:
                 textposition='top right',
                 marker=dict(
                     size=12,
-                    color=['#ff6b6b' if is_loggenix else '#4a90e2'
-                           for is_loggenix in df['IsLoggenix']],
+                    color=scatter_colors,
                     line=dict(width=1, color='black')
                 ),
                 name='Models',
