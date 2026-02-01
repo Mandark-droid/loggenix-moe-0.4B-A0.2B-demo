@@ -1,4 +1,6 @@
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 import json
 import re
 import time
@@ -7,8 +9,29 @@ from typing import Dict, Any, Optional, List
 # Ollama configuration
 OLLAMA_BASE_URL = "http://localhost:11434"  # Default Ollama URL
 
+# Timeout configuration (in seconds)
+OLLAMA_CONNECT_TIMEOUT = 30      # Time to establish connection
+OLLAMA_READ_TIMEOUT = 600        # Time to wait for response (10 minutes)
+OLLAMA_PULL_TIMEOUT = 1200       # Time for model pull (20 minutes)
+
+def get_retry_session(retries=3, backoff_factor=1.0):
+    """Create a requests session with retry logic"""
+    session = requests.Session()
+    retry = Retry(
+        total=retries,
+        read=retries,
+        connect=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=(500, 502, 503, 504),
+        allowed_methods=["HEAD", "GET", "POST"]
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+    return session
+
 # Default model (fallback if no model_name provided)
-DEFAULT_MODEL_NAME = "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.1:Q8_0"
+DEFAULT_MODEL_NAME = "hf.co/kshitijthakkar/loggenix-moe-0.4B-0.2A-sft-s3.1:f16"
 
 # Currently active model (updated dynamically)
 _current_model_name = DEFAULT_MODEL_NAME
@@ -50,7 +73,11 @@ def get_inference_configs():
 def check_ollama_connection():
     """Check if Ollama is running and accessible"""
     try:
-        response = requests.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=5)
+        session = get_retry_session(retries=2, backoff_factor=0.5)
+        response = session.get(
+            f"{OLLAMA_BASE_URL}/api/tags",
+            timeout=(OLLAMA_CONNECT_TIMEOUT, 30)
+        )
         return response.status_code == 200
     except requests.RequestException:
         return False
@@ -59,7 +86,11 @@ def check_ollama_connection():
 def list_ollama_models():
     """List available models in Ollama"""
     try:
-        response = requests.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=5)
+        session = get_retry_session(retries=2, backoff_factor=0.5)
+        response = session.get(
+            f"{OLLAMA_BASE_URL}/api/tags",
+            timeout=(OLLAMA_CONNECT_TIMEOUT, 30)
+        )
         if response.status_code == 200:
             models = response.json().get("models", [])
             return [model["name"] for model in models]
@@ -86,10 +117,11 @@ def load_model(model_name: str = None):
         print(f"Model '{_current_model_name}' not found in Ollama. Attempting to pull...")
         # Try to pull the model
         try:
-            pull_response = requests.post(
+            session = get_retry_session(retries=2, backoff_factor=2.0)
+            pull_response = session.post(
                 f"{OLLAMA_BASE_URL}/api/pull",
                 json={"name": _current_model_name},
-                timeout=600  # 10 min timeout for pulling
+                timeout=(OLLAMA_CONNECT_TIMEOUT, OLLAMA_PULL_TIMEOUT)
             )
             if pull_response.status_code == 200:
                 print(f"Successfully pulled model: {_current_model_name}")
@@ -344,16 +376,19 @@ def call_ollama_api(messages: List[Dict], config: Dict, model_name: str = None, 
         if stream:
             return stream_ollama_response(payload)
         else:
-            response = requests.post(
+            session = get_retry_session(retries=3, backoff_factor=1.0)
+            response = session.post(
                 f"{OLLAMA_BASE_URL}/api/generate",
                 json=payload,
-                timeout=300  # 5 minutes timeout
+                timeout=(OLLAMA_CONNECT_TIMEOUT, OLLAMA_READ_TIMEOUT)
             )
             response.raise_for_status()
 
             result = response.json()
             return result.get("response", "")
 
+    except requests.exceptions.Timeout as e:
+        raise ConnectionError(f"Ollama request timed out after {OLLAMA_READ_TIMEOUT}s. Try a shorter prompt or 'Optimized for Speed' config: {str(e)}")
     except requests.RequestException as e:
         raise ConnectionError(f"Failed to connect to Ollama: {str(e)}")
     except json.JSONDecodeError as e:
@@ -365,11 +400,12 @@ def stream_ollama_response(payload: Dict) -> str:
     full_response = ""
 
     try:
-        response = requests.post(
+        session = get_retry_session(retries=3, backoff_factor=1.0)
+        response = session.post(
             f"{OLLAMA_BASE_URL}/api/generate",
             json=payload,
             stream=True,
-            timeout=300
+            timeout=(OLLAMA_CONNECT_TIMEOUT, OLLAMA_READ_TIMEOUT)
         )
         response.raise_for_status()
 
@@ -388,6 +424,8 @@ def stream_ollama_response(payload: Dict) -> str:
                 except json.JSONDecodeError:
                     continue
 
+    except requests.exceptions.Timeout as e:
+        raise ConnectionError(f"Streaming timed out after {OLLAMA_READ_TIMEOUT}s. Try a shorter prompt or 'Optimized for Speed' config: {str(e)}")
     except requests.RequestException as e:
         raise ConnectionError(f"Streaming failed: {str(e)}")
 
