@@ -645,8 +645,8 @@ def chat_interface_with_inference(prompt, history, system_prompt, inference_conf
     # Update current checkpoint
     CURRENT_CHECKPOINT_KEY = checkpoint_key
 
-    # Add user message to history
-    history.append(("You", prompt))
+    # Add user message to history (Gradio 6 messages format)
+    history.append({"role": "user", "content": prompt})
 
     try:
         if not system_prompt.strip():
@@ -680,28 +680,28 @@ def chat_interface_with_inference(prompt, history, system_prompt, inference_conf
                     model_name=model_name
                 )
 
-        # Format and add AI response to history
+        # Format and add AI response to history (Gradio 6 messages format)
         formatted_response = f"**AI Assistant ({checkpoint_key}, {backend_label}):**\n{response}"
-        history.append(("AI Assistant", formatted_response))
+        history.append({"role": "assistant", "content": formatted_response})
 
     except Exception as e:
         error_msg = f"**AI Assistant:**\nError during inference: {str(e)}"
-        history.append(("AI Assistant", error_msg))
+        history.append({"role": "assistant", "content": error_msg})
 
     return history, ""
 
 
 def flag_response(history, flagged_message, flag_reason):
-    """Flag a response and push to HuggingFace Hub dataset"""
+    """Flag a response and push to HuggingFace Hub dataset (Gradio 6 messages format)"""
     if not flagged_message or flagged_message == "No responses available":
         return "Invalid message selection."
 
     try:
         flagged_index = int(flagged_message.split()[1][:-1])
-        if flagged_index >= len(history) or history[flagged_index][0] != "AI Assistant":
+        if flagged_index >= len(history) or history[flagged_index].get("role") != "assistant":
             return "You can only flag assistant responses."
 
-        flagged_message_content = history[flagged_index][1]
+        flagged_message_content = history[flagged_index].get("content", "")
 
         # Get current checkpoint info
         checkpoint_info = CHECKPOINT_REGISTRY.get(CURRENT_CHECKPOINT_KEY, CHECKPOINT_REGISTRY[DEFAULT_CHECKPOINT])
@@ -734,11 +734,11 @@ def flag_response(history, flagged_message, flag_reason):
 
 
 def get_assistant_responses(history):
-    """Get dropdown options for assistant responses"""
+    """Get dropdown options for assistant responses (Gradio 6 messages format)"""
     responses = [
-        f"Response {i}: {str(msg[1])[:50]}..."
+        f"Response {i}: {str(msg.get('content', ''))[:50]}..."
         for i, msg in enumerate(history)
-        if msg[0] == "AI Assistant"
+        if msg.get("role") == "assistant"
     ]
 
     if not responses:
@@ -748,14 +748,14 @@ def get_assistant_responses(history):
 
 
 def display_selected_message(selected_index, history):
-    """Display the selected flagged message"""
+    """Display the selected flagged message (Gradio 6 messages format)"""
     if selected_index == "No responses available":
         return "No responses available"
 
     try:
         flagged_index = int(selected_index.split()[1][:-1])
-        if flagged_index < len(history) and history[flagged_index][0] == "AI Assistant":
-            return history[flagged_index][1]
+        if flagged_index < len(history) and history[flagged_index].get("role") == "assistant":
+            return history[flagged_index].get("content", "")
         else:
             return "Invalid selection."
     except Exception as e:
@@ -828,7 +828,7 @@ def read_flagged_messages():
 
 
 def handle_row_select(evt: gr.SelectData):
-    """Handle row selection in flagged messages table"""
+    """Handle row selection in flagged messages table (Gradio 6 messages format)"""
     try:
         # Load from Hub
         ds = load_dataset(FLAGGED_RESPONSES_DATASET, split='train')
@@ -839,12 +839,18 @@ def handle_row_select(evt: gr.SelectData):
             context_str = row.get("conversation_context", "[]")
             try:
                 conversation_context = json.loads(context_str)
+                # Convert old tuple format to messages format if needed
+                if conversation_context and isinstance(conversation_context[0], (list, tuple)):
+                    conversation_context = [
+                        {"role": "user" if msg[0] == "You" else "assistant", "content": msg[1]}
+                        for msg in conversation_context
+                    ]
             except:
                 conversation_context = []
             return conversation_context
         return []
     except Exception as e:
-        return [("System", f"Error loading conversation: {str(e)}")]
+        return [{"role": "assistant", "content": f"Error loading conversation: {str(e)}"}]
 
 
 # ===== MAIN INTERFACE =====
@@ -1276,10 +1282,14 @@ def create_interface():
 if __name__ == "__main__":
     print("Starting Loggenix MoE 0.4B Demo...")
     demo = create_interface()
+
+    # Load custom Akatsuki theme from HuggingFace
+    akatsuki_theme = gr.Theme.from_hub("kshitijthakkar/my_Akatsuki_theme")
+
     demo.launch(
         server_name="0.0.0.0",
         server_port=7860,
         share=False,
-        debug=True,
-        theme=gr.themes.Soft()
+        debug=False,
+        theme=akatsuki_theme
     )
