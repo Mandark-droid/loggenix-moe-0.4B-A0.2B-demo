@@ -692,6 +692,9 @@ def chat_interface_with_inference(prompt, history, system_prompt, inference_conf
     history.append({"role": "user", "content": prompt})
 
     try:
+        # Set default backend label
+        backend_label = backend.split(" ")[0] if backend else "Unknown"
+
         if not system_prompt.strip():
             response = "Please select a task type to load system prompt first."
         else:
@@ -1232,6 +1235,36 @@ def create_interface():
                 gr.Markdown("## Model Evaluation Results")
                 gr.Markdown("### Loggenix MoE 0.4B - Checkpoint Benchmark Comparison")
 
+                with gr.Accordion("Chart Guide & Color Legend", open=False):
+                    gr.Markdown("""
+### Color Legend
+| Color | Meaning |
+|-------|---------|
+| **Red** | Current Loggenix 0.4B model (selected checkpoint) |
+| **Orange** | Loggenix 0.3B (previous version, family comparison) |
+| **Green** | Models that Loggenix 0.4B **outperforms** |
+| **Blue** | Other baseline models |
+
+### Benchmark Descriptions
+| Benchmark | Description |
+|-----------|-------------|
+| **MMLU** | Massive Multitask Language Understanding - 57 academic subjects |
+| **HellaSwag** | Commonsense reasoning about everyday situations |
+| **PIQA** | Physical Intuition QA - understanding physical world |
+| **ARC** | AI2 Reasoning Challenge - grade-school science questions |
+| **WinoGrande** | Commonsense pronoun resolution |
+| **BoolQ** | Boolean (yes/no) reading comprehension questions |
+| **OpenBookQA** | Science facts with open-book reasoning |
+| **GSM8K** | Grade school math word problems |
+
+### Chart Types
+- **Zero-Shot**: Model answers without examples (tests raw knowledge)
+- **Few-Shot**: Model given a few examples first (tests learning ability)
+
+### Why This Matters
+Our tiny **$200 budget** model (0.4B params) trained on consumer hardware competes with and sometimes **outperforms** models from major AI labs with billion-dollar budgets. Green bars show where Loggenix wins!
+                    """)
+
                 def plot_comparison(checkpoint_key, shot_type, plot_type):
                     """Generate benchmark comparison for selected checkpoint"""
                     plotter = BenchmarkPlotter(checkpoint_key)
@@ -1256,6 +1289,9 @@ def create_interface():
 | PIQA | {benchmarks.get('PIQA', 0):.2f}% |
 | ARC | {benchmarks.get('ARC', 0):.2f}% |
 | WinoGrande | {benchmarks.get('WinoGrande', 0):.2f}% |
+| BoolQ | {benchmarks.get('BoolQ', 0):.2f}% |
+| OpenBookQA | {benchmarks.get('OpenBookQA', 0):.2f}% |
+| GSM8K | {benchmarks.get('GSM8K', 0):.2f}% |
 """
                     return fig, summary, info_text
 
@@ -1326,13 +1362,10 @@ if __name__ == "__main__":
     print("Starting Loggenix MoE 0.4B Demo...")
     demo = create_interface()
 
-    # Load custom Akatsuki theme from HuggingFace
-    akatsuki_theme = gr.Theme.from_hub("kshitijthakkar/my_Akatsuki_theme")
-
     demo.launch(
         server_name="0.0.0.0",
         server_port=7860,
         share=False,
         debug=False,
-        theme=akatsuki_theme
+        theme=gr.themes.Ocean()
     )
